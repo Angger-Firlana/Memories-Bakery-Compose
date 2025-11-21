@@ -1,5 +1,7 @@
 package com.example.kenanganbakery.presentation.viewmodel
 
+import com.example.kenanganbakery.data.repository.MenuRepository
+
 import android.app.Application
 import android.content.Context
 import androidx.lifecycle.AndroidViewModel
@@ -11,24 +13,24 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class BranchViewModel(application:Application):AndroidViewModel(application) {
-    private val repository = BranchRepository(application.applicationContext)
+class MenuViewModel(application:Application):AndroidViewModel(application) {
+    private val repository = MenuRepository(application.applicationContext)
 
     private val _state = MutableStateFlow<Boolean?>(null)
     val state = _state.asStateFlow()
 
-    private val _branchs = MutableStateFlow<List<Branch>>(emptyList())
-    val branchs = _branchs.asStateFlow()
+    private val _menus = MutableStateFlow<List<Menu>>(emptyList())
+    val menus = _menus.asStateFlow()
 
-    fun getAllBranch(
+    fun getAllMenu(
         category:String?=null,
         search:String?=null
     ){
         viewModelScope.launch {
-            val result = repository.indexBranch(category, search)
+            val result = repository.indexMenu(category, search)
             result.fold(
                 onSuccess = {
-                    _branchs.value = it.data
+                    _menus.value = it.data
                 },
                 onFailure = {
 

@@ -1,8 +1,5 @@
 package com.example.kenanganbakery.presentation.ui.screen.pelanggan.menu
 
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -23,26 +20,46 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import com.example.kenanganbakery.domain.models.branch.Branch
+import com.example.kenanganbakery.domain.models.menu.Menu
+import com.example.kenanganbakery.domain.models.type.Type
+import com.example.kenanganbakery.presentation.viewmodel.BranchViewModel
+import com.example.kenanganbakery.presentation.viewmodel.MenuViewModel
+import com.example.kenanganbakery.presentation.viewmodel.OrderViewModel
+import com.example.kenanganbakery.presentation.viewmodel.TypeViewModel
 
 
 data class CartItem(
-    val product: Product,
+    val menu: Menu,
     var quantity: Int
 )
 
 
 @Composable
 fun MenuScreen(
-
+    branchViewModel: BranchViewModel,
+    menuViewModel:MenuViewModel,
+    orderViewModel:OrderViewModel,
+    typeViewModel:TypeViewModel
 ) {
-    var selectedCategory by remember { mutableStateOf("pastries") }
+    val branchs by branchViewModel.branchs.collectAsState()
+    val menus by menuViewModel.menus.collectAsState()
+    val types by typeViewModel.types.collectAsState()
+
+    var selectedTypeId by remember { mutableStateOf(1) }
     var deliveryMode by remember { mutableStateOf("Pick up") }
-    var selectedBranch by remember { mutableStateOf(DummyData.branches[0]) }
+    var selectedBranch by remember { mutableStateOf(branchs[0]) }
     var showBranchDialog by remember { mutableStateOf(false) }
-    var selectedProduct by remember { mutableStateOf<Product?>(null) }
+    var selectedProduct by remember { mutableStateOf<Menu?>(null) }
     var cartItems by remember { mutableStateOf<List<CartItem>>(emptyList()) }
     var showCart by remember { mutableStateOf(false) }
     var showClearCartDialog by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        branchViewModel.getAllBranch()
+        menuViewModel.getAllMenu()
+        typeViewModel.getAllType()
+    }
 
     Box(
         modifier = Modifier
@@ -53,9 +70,11 @@ fun MenuScreen(
             deliveryMode = deliveryMode,
             onDeliveryModeChange = { deliveryMode = it },
             selectedBranch = selectedBranch,
+            types = types,
+            menus = menus,
             onBranchClick = { showBranchDialog = true },
-            selectedCategory = selectedCategory,
-            onCategoryChange = { selectedCategory = it },
+            selectedTypeId = selectedTypeId,
+            onCategoryChange = { selectedTypeId = it },
             onProductClick = { selectedProduct = it },
             cartItems = cartItems,
             onCartClick = { showCart = true }
@@ -65,7 +84,7 @@ fun MenuScreen(
     // Branch Selection Dialog
     if (showBranchDialog) {
         BranchSelectionDialog(
-            branches = DummyData.branches,
+            branches = branchs,
             selectedBranch = selectedBranch,
             onBranchSelected = {
                 selectedBranch = it
@@ -81,10 +100,10 @@ fun MenuScreen(
             product = product,
             onDismiss = { selectedProduct = null },
             onAddToCart = {
-                val existingItem = cartItems.find { it.product.id == product.id }
+                val existingItem = cartItems.find { it.menu.id == product.id }
                 if (existingItem != null) {
                     cartItems = cartItems.map {
-                        if (it.product.id == product.id) it.copy(quantity = it.quantity + 1)
+                        if (it.menu.id == product.id) it.copy(quantity = it.quantity + 1)
                         else it
                     }
                 } else {
@@ -102,7 +121,7 @@ fun MenuScreen(
             onDismiss = { showCart = false },
             onQuantityChange = { productId, delta ->
                 cartItems = cartItems.map {
-                    if (it.product.id == productId) {
+                    if (it.menu.id == productId) {
                         val newQuantity = (it.quantity + delta).coerceAtLeast(1)
                         it.copy(quantity = newQuantity)
                     } else it
@@ -155,10 +174,12 @@ fun HomeScreen(
     deliveryMode: String,
     onDeliveryModeChange: (String) -> Unit,
     selectedBranch: Branch,
+    types:List<Type>,
+    menus:List<Menu>,
     onBranchClick: () -> Unit,
-    selectedCategory: String,
-    onCategoryChange: (String) -> Unit,
-    onProductClick: (Product) -> Unit,
+    selectedTypeId: Int,
+    onCategoryChange: (Int) -> Unit,
+    onProductClick: (Menu) -> Unit,
     cartItems: List<CartItem>,
     onCartClick: () -> Unit
 ) {
@@ -249,11 +270,11 @@ fun HomeScreen(
                 LazyRow(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    items(listOf("pastries", "cakes", "bread", "cookies")) { category ->
+                    items(types) { type ->
                         CategoryChip(
-                            text = category,
-                            selected = selectedCategory == category,
-                            onClick = { onCategoryChange(category) }
+                            text = type.type_name,
+                            selected = selectedTypeId == type.id,
+                            onClick = { onCategoryChange(type.id) }
                         )
                     }
                 }
@@ -276,8 +297,8 @@ fun HomeScreen(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 contentPadding = PaddingValues(horizontal = 16.dp)
             ) {
-                val recommendedProducts = DummyData.products.filter {
-                    it.category == "cakes"
+                val recommendedProducts = menus.filter {
+                    it.type_id == 1
                 }.take(3)
 
                 items(recommendedProducts) { product ->
@@ -298,7 +319,7 @@ fun HomeScreen(
         }
 
         // Products Grid
-        val filteredProducts = DummyData.products.filter { it.category == selectedCategory }
+        val filteredProducts = menus.filter { it.type_id == selectedTypeId }
         items(filteredProducts.chunked(2)) { productPair ->
             Row(
                 modifier = Modifier
@@ -340,7 +361,7 @@ fun HomeScreen(
                     contentDescription = "Cart"
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Rp ${cartItems.sumOf { it.product.price * it.quantity }.formatPrice()}")
+                Text("Rp ${cartItems.sumOf { it.menu.price * it.quantity }.formatPrice()}")
                 Spacer(modifier = Modifier.width(16.dp))
                 Text("Buy")
             }
@@ -385,7 +406,7 @@ fun CategoryChip(text: String, selected: Boolean, onClick: () -> Unit) {
 }
 
 @Composable
-fun ProductCard(product: Product, onClick: (Product) -> Unit) {
+fun ProductCard(product: Menu, onClick: (Menu) -> Unit) {
     Card(
         modifier = Modifier
             .width(160.dp)
@@ -399,7 +420,7 @@ fun ProductCard(product: Product, onClick: (Product) -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = product.image,
+                text = "",
                 fontSize = 60.sp,
                 modifier = Modifier.padding(16.dp)
             )
@@ -494,7 +515,7 @@ fun BranchItem(branch: Branch, isSelected: Boolean, onClick: () -> Unit) {
 
 @Composable
 fun ProductDetailDialog(
-    product: Product,
+    product: Menu,
     onDismiss: () -> Unit,
     onAddToCart: () -> Unit
 ) {
@@ -536,7 +557,7 @@ fun ProductDetailDialog(
                             .background(Color(0xFFF5EFE7)),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(text = product.image, fontSize = 100.sp)
+                        Text(text = "\uD83C\uDF70", fontSize = 100.sp)
                     }
 
                     // Product Info
@@ -561,21 +582,21 @@ fun ProductDetailDialog(
                             color = Color.Gray,
                             lineHeight = 20.sp
                         )
-                        Spacer(modifier = Modifier.height(12.dp))
-                        Text(
-                            text = "Berat: ±${product.weight} gram",
-                            fontSize = 14.sp,
-                            color = Color(0xFF3D2518)
-                        )
-                        if (product.ingredients.isNotEmpty()) {
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = "Komposisi: ${product.ingredients}",
-                                fontSize = 14.sp,
-                                color = Color(0xFF3D2518),
-                                lineHeight = 20.sp
-                            )
-                        }
+//                        Spacer(modifier = Modifier.height(12.dp))
+//                        Text(
+//                            text = "Berat: ±${product.weight} gram",
+//                            fontSize = 14.sp,
+//                            color = Color(0xFF3D2518)
+//                        )
+//                        if (product.ingredients.isNotEmpty()) {
+//                            Spacer(modifier = Modifier.height(8.dp))
+//                            Text(
+//                                text = "Komposisi: ${product.ingredients}",
+//                                fontSize = 14.sp,
+//                                color = Color(0xFF3D2518),
+//                                lineHeight = 20.sp
+//                            )
+//                        }
                     }
                 }
 
@@ -656,7 +677,7 @@ fun CartDialog(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "Rp ${cartItems.sumOf { it.product.price * it.quantity }.formatPrice()}",
+                            text = "Rp ${cartItems.sumOf { it.menu.price * it.quantity }.formatPrice()}",
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color(0xFF3D2518)
@@ -694,17 +715,17 @@ fun CartItemRow(cartItem: CartItem, onQuantityChange: (Int, Int) -> Unit) {
                     .background(Color(0xFFF5EFE7), RoundedCornerShape(12.dp)),
                 contentAlignment = Alignment.Center
             ) {
-                Text(text = cartItem.product.image, fontSize = 30.sp)
+                Text(text = "\uD83C\uDF70", fontSize = 30.sp)
             }
             Spacer(modifier = Modifier.width(12.dp))
             Column {
                 Text(
-                    text = cartItem.product.name,
+                    text = cartItem.menu.name,
                     fontWeight = FontWeight.SemiBold,
                     color = Color(0xFF3D2518)
                 )
                 Text(
-                    text = "Rp ${cartItem.product.price.formatPrice()}",
+                    text = "Rp ${cartItem.menu.price.formatPrice()}",
                     fontSize = 14.sp,
                     color = Color.Gray
                 )
@@ -713,7 +734,7 @@ fun CartItemRow(cartItem: CartItem, onQuantityChange: (Int, Int) -> Unit) {
 
         Row(verticalAlignment = Alignment.CenterVertically) {
             IconButton(
-                onClick = { onQuantityChange(cartItem.product.id, -1) },
+                onClick = { onQuantityChange(cartItem.menu.id, -1) },
                 modifier = Modifier
                     .size(32.dp)
                     .background(Color(0xFFF5EFE7), CircleShape)
@@ -732,7 +753,7 @@ fun CartItemRow(cartItem: CartItem, onQuantityChange: (Int, Int) -> Unit) {
                 color = Color(0xFF3D2518)
             )
             IconButton(
-                onClick = { onQuantityChange(cartItem.product.id, 1) },
+                onClick = { onQuantityChange(cartItem.menu.id, 1) },
                 modifier = Modifier
                     .size(32.dp)
                     .background(Color(0xFF6B4E3D), CircleShape)

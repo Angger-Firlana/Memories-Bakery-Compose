@@ -26,6 +26,10 @@ import com.example.kenanganbakery.presentation.ui.screen.pelanggan.menu.MenuScre
 import com.example.kenanganbakery.presentation.ui.screen.profile.ProfileScreen
 import com.example.kenanganbakery.presentation.ui.screen.splash.welcome.WelcomeScreen
 import com.example.kenanganbakery.presentation.viewmodel.AuthViewModel
+import com.example.kenanganbakery.presentation.viewmodel.BranchViewModel
+import com.example.kenanganbakery.presentation.viewmodel.MenuViewModel
+import com.example.kenanganbakery.presentation.viewmodel.OrderViewModel
+import com.example.kenanganbakery.presentation.viewmodel.TypeViewModel
 
 @Composable
 fun AppNavigation(
@@ -37,6 +41,23 @@ fun AppNavigation(
     val authViewModel: AuthViewModel = viewModel(
         factory = ViewModelProvider.AndroidViewModelFactory.getInstance(application = context.applicationContext as Application)
     )
+
+    val orderViewModel:OrderViewModel = viewModel(
+        factory = ViewModelProvider.AndroidViewModelFactory.getInstance(application = context.applicationContext as Application)
+    )
+
+    val branchViewModel:BranchViewModel = viewModel(
+        factory = ViewModelProvider.AndroidViewModelFactory.getInstance(application = context.applicationContext as Application)
+    )
+
+    val menuViewModel: MenuViewModel = viewModel(
+        factory = ViewModelProvider.AndroidViewModelFactory.getInstance(application = context.applicationContext as Application)
+    )
+
+    val typeViewModel:TypeViewModel = viewModel(
+        factory = ViewModelProvider.AndroidViewModelFactory.getInstance(application = context.applicationContext as Application)
+    )
+
     var showBottomBar by remember {mutableStateOf(false )}
     val checkStartLogin = if(tokenManager.getToken() != null) Screen.Dashboard.route else Screen.Auth.route
     val startDestination = if (welcomeManager.getStateWelcome()) Screen.Welcome.route else checkStartLogin
@@ -97,7 +118,12 @@ fun AppNavigation(
 
             composable(Screen.Menu.route) {
                 showBottomBar = true
-                MenuScreen()
+                MenuScreen(
+                    branchViewModel = branchViewModel,
+                    menuViewModel = menuViewModel,
+                    orderViewModel = orderViewModel,
+                    typeViewModel = typeViewModel
+                )
             }
 
             composable(Screen.History.route) {

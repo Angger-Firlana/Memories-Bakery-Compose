@@ -10,6 +10,7 @@ import com.example.kenanganbakery.domain.models.order.GetOrderResponse
 import com.example.kenanganbakery.domain.models.order.HitOrderResponse
 import com.example.kenanganbakery.domain.models.order.PostOrderRequest
 import com.example.kenanganbakery.domain.models.order.UpdateOrderRequest
+import com.example.kenanganbakery.domain.models.type.GetTypeResponse
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -30,6 +31,9 @@ interface APIService {
         @Body
         request:RegisterRequest
     ):Response<RegisterResponse>
+
+    @GET("types")
+    suspend fun indexType():Response<GetTypeResponse>
 
     @GET("menus")
     suspend fun indexMenus(
