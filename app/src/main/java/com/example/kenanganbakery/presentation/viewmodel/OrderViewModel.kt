@@ -4,6 +4,7 @@ import com.example.kenanganbakery.data.repository.MenuRepository
 
 import android.app.Application
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.kenanganbakery.data.repository.BranchRepository
@@ -25,6 +26,9 @@ class OrderViewModel(application:Application):AndroidViewModel(application) {
     private val _orders = MutableStateFlow<List<Order>>(emptyList())
     val orders = _orders.asStateFlow()
 
+    private val _order = MutableStateFlow<Order?>(null)
+    val order = _order.asStateFlow()
+
     fun getAllOrders(
         category:String?=null,
         search:String?=null
@@ -37,6 +41,22 @@ class OrderViewModel(application:Application):AndroidViewModel(application) {
                 },
                 onFailure = {
 
+                }
+            )
+        }
+    }
+
+    fun getDetailOrder(
+        id:Int
+    ){
+        viewModelScope.launch {
+            val result = repository.getDetailOrder(id)
+            result.fold(
+                onSuccess = {
+                    _order.value = it.data
+                },
+                onFailure = {
+                    Log.e("OrderDetailViewModel", it.message?: "Unknown error")
                 }
             )
         }

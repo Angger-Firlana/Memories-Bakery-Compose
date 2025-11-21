@@ -14,6 +14,11 @@ data class GetOrderResponse(
     val data: List<Order>
 )
 
+data class GetDetailOrderResponse(
+    val success: Boolean?,  // Jika kamu mau meta pagination
+    val data: Order
+)
+
 data class Meta(
     val current_page: Int?,
     val per_page: Int?,

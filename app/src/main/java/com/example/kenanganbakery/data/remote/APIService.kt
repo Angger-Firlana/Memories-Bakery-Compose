@@ -6,6 +6,7 @@ import com.example.kenanganbakery.domain.models.auth.RegisterRequest
 import com.example.kenanganbakery.domain.models.auth.RegisterResponse
 import com.example.kenanganbakery.domain.models.branch.GetBranchResponse
 import com.example.kenanganbakery.domain.models.menu.GetMenuResponse
+import com.example.kenanganbakery.domain.models.order.GetDetailOrderResponse
 import com.example.kenanganbakery.domain.models.order.GetOrderResponse
 import com.example.kenanganbakery.domain.models.order.HitOrderResponse
 import com.example.kenanganbakery.domain.models.order.PostOrderRequest
@@ -52,6 +53,9 @@ interface APIService {
     /////////////////////////////ORDERRRRRR?///////////////////////////////////////
     @GET("orders")
     suspend fun indexOrder():Response<GetOrderResponse>
+
+    @GET("orders/{id}")
+    suspend fun detailOrder(@Path("id") id:Int):Response<GetDetailOrderResponse>
 
     @POST("orders")
     suspend fun postOrder(@Body request:PostOrderRequest):Response<HitOrderResponse>
