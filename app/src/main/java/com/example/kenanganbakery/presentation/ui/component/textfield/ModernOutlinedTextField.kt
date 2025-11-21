@@ -10,6 +10,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -19,6 +21,7 @@ fun ModernOutlinedTextField(
     placeholderText:String? =null,
     trailingIcon: ImageVector? = null,
     leadingIcon:ImageVector? =  null,
+    isPassword:Boolean = false,
     modifier:Modifier = Modifier
 ) {
     OutlinedTextField(
@@ -51,10 +54,12 @@ fun ModernOutlinedTextField(
                 )
             }
         },
+        visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None,
         colors = OutlinedTextFieldDefaults.colors(
             unfocusedContainerColor = Color.Gray.copy(0.1f),
             focusedContainerColor = Color.Gray.copy(0.3f)
         ),
+
         modifier = modifier
     )
 }
