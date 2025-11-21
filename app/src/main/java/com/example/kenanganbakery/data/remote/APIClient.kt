@@ -1,6 +1,7 @@
 package com.example.kenanganbakery.data.remote
 
 import android.content.Context
+import android.util.Log
 import com.example.kenanganbakery.data.local.TokenManager
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
@@ -16,7 +17,9 @@ object APIClient {
             val builder = originalRequest.newBuilder()
             val token = TokenManager(context).getToken()
             token?.let {
+
                 builder.addHeader("Authorization", "Bearer $it")
+
             }
             chain.proceed(builder.build())
         }

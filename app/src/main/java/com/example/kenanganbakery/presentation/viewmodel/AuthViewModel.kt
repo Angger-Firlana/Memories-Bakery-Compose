@@ -1,9 +1,11 @@
 package com.example.kenanganbakery.presentation.viewmodel
 
 import android.app.Application
+import android.content.Context
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.kenanganbakery.data.local.TokenManager
 import com.example.kenanganbakery.data.repository.AuthRepository
 import com.example.kenanganbakery.domain.models.auth.LoginRequest
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,14 +22,18 @@ class AuthViewModel(application:Application):AndroidViewModel(application) {
     val isLoading = _isLoading.asStateFlow()
 
     fun login(
-        request:LoginRequest
+        request:LoginRequest,
+        context:Context
     ){
         viewModelScope.launch {
+            val tokenManager = TokenManager(context)
             val result = repository.login(request)
             _isLoading.value = true
             result.fold(
                 onSuccess = {
+                    tokenManager.saveToken(it.token)
                     _state.value = true
+
                     Log.d("AuthViewModel", it.toString())
                 },
                 onFailure = {

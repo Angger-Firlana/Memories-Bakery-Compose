@@ -1,6 +1,7 @@
 package com.example.kenanganbakery.presentation.viewmodel
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.kenanganbakery.data.repository.TypeRepository
@@ -24,7 +25,7 @@ class TypeViewModel(application:Application): AndroidViewModel(application) {
                     _types.value = it.data
                 },
                 onFailure = {
-
+                    Log.e("ViewModelError", "Type get error: ${it.message}")
                 }
             )
         }

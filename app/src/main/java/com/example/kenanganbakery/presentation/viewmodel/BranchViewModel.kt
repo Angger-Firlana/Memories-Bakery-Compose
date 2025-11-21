@@ -2,6 +2,7 @@ package com.example.kenanganbakery.presentation.viewmodel
 
 import android.app.Application
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.kenanganbakery.data.repository.BranchRepository
@@ -31,7 +32,7 @@ class BranchViewModel(application:Application):AndroidViewModel(application) {
                     _branchs.value = it.data
                 },
                 onFailure = {
-
+                    Log.e("ViewModelError", "Branch get error: ${it.message}")
                 }
             )
         }

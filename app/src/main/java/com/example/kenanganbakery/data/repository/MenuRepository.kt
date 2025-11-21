@@ -9,22 +9,35 @@ import com.example.kenanganbakery.domain.models.menu.GetMenuResponse
 class MenuRepository(context:Context) {
     private val api = APIClient.getClient(context)
 
-    suspend fun indexMenu(category:String?=null, search:String?=null):Result<GetMenuResponse>{
-        return try{
+    suspend fun indexMenu(
+        category: String? = null,
+        search: String? = null
+    ): Result<GetMenuResponse> {
+        return try {
             val response = api.indexMenus(category = category, search = search)
 
-            if (response.isSuccessful){
+            if (response.isSuccessful) {
                 val body = response.body()
-                if (body != null){
+                if (body != null) {
                     Result.success(body)
-                }else{
-                    Result.failure(Exception("null body"))
+                } else {
+                    Result.failure(Exception("Response body is null"))
                 }
-            }else{
-                Result.failure(Exception("Error : ${response.errorBody()}"))
+            } else {
+                // Ambil error body string agar lebih jelas
+                val errorString = response.errorBody()?.string() ?: "Unknown error body"
+
+                Result.failure(
+                    Exception(
+                        "HTTP ${response.code()} - ${response.message()}\nServer response: $errorString"
+                    )
+                )
             }
-        }catch(e:Exception){
-            Result.failure(e)
+        } catch (e: Exception) {
+            Result.failure(
+                Exception("Network/Unexpected error: ${e.localizedMessage ?: e.toString()}")
+            )
         }
     }
+
 }

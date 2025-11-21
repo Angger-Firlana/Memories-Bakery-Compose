@@ -1,6 +1,6 @@
 package com.example.kenanganbakery.domain.models.menu
 
-import com.example.kenanganbakery.presentation.ui.screen.pelanggan.menu.Branch
+import com.example.kenanganbakery.domain.models.branch.Branch
 
 data class GetMenuResponse(
     val success:Boolean,
@@ -20,5 +20,5 @@ data class Menu(
     val price:Int,
     val description:String,
     val validDuration:Int,
-    val branch:Branch?=null
+    val branch: Branch?=null
 )

@@ -14,7 +14,8 @@ fun BottomBar(
     currentDestination: NavDestination?
 ) {
     NavigationBar(
-        containerColor = Color.White
+        containerColor = MaterialTheme.colorScheme.primary,
+        contentColor = MaterialTheme.colorScheme.onBackground
     ) {
         BottomBarData.listBottomBar.forEach { item ->
             val selected = currentDestination?.hierarchy?.any {

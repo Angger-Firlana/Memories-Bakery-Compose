@@ -48,7 +48,7 @@ fun MenuScreen(
 
     var selectedTypeId by remember { mutableStateOf(1) }
     var deliveryMode by remember { mutableStateOf("Pick up") }
-    var selectedBranch by remember { mutableStateOf(branchs[0]) }
+    var selectedBranch by remember { mutableStateOf<Branch?>(null) }
     var showBranchDialog by remember { mutableStateOf(false) }
     var selectedProduct by remember { mutableStateOf<Menu?>(null) }
     var cartItems by remember { mutableStateOf<List<CartItem>>(emptyList()) }
@@ -61,28 +61,43 @@ fun MenuScreen(
         typeViewModel.getAllType()
     }
 
+    // Set default branch when data is loaded
+    LaunchedEffect(branchs) {
+        if (selectedBranch == null && branchs.isNotEmpty()) {
+            selectedBranch = branchs[0]
+        }
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFF5EFE7))
     ) {
-        HomeScreen(
-            deliveryMode = deliveryMode,
-            onDeliveryModeChange = { deliveryMode = it },
-            selectedBranch = selectedBranch,
-            types = types,
-            menus = menus,
-            onBranchClick = { showBranchDialog = true },
-            selectedTypeId = selectedTypeId,
-            onCategoryChange = { selectedTypeId = it },
-            onProductClick = { selectedProduct = it },
-            cartItems = cartItems,
-            onCartClick = { showCart = true }
-        )
+        // Show loading or empty state
+        when {
+            branchs.isEmpty() || menus.isEmpty() || types.isEmpty() -> {
+                LoadingOrEmptyState()
+            }
+            else -> {
+                HomeScreen(
+                    deliveryMode = deliveryMode,
+                    onDeliveryModeChange = { deliveryMode = it },
+                    selectedBranch = selectedBranch,
+                    types = types,
+                    menus = menus,
+                    onBranchClick = { showBranchDialog = true },
+                    selectedTypeId = selectedTypeId,
+                    onCategoryChange = { selectedTypeId = it },
+                    onProductClick = { selectedProduct = it },
+                    cartItems = cartItems,
+                    onCartClick = { showCart = true }
+                )
+            }
+        }
     }
 
     // Branch Selection Dialog
-    if (showBranchDialog) {
+    if (showBranchDialog && branchs.isNotEmpty()) {
         BranchSelectionDialog(
             branches = branchs,
             selectedBranch = selectedBranch,
@@ -170,10 +185,34 @@ fun MenuScreen(
 }
 
 @Composable
+fun LoadingOrEmptyState() {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            CircularProgressIndicator(
+                color = Color(0xFF6B4E3D),
+                modifier = Modifier.size(48.dp)
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = "Memuat data...",
+                fontSize = 16.sp,
+                color = Color(0xFF3D2518)
+            )
+        }
+    }
+}
+
+@Composable
 fun HomeScreen(
     deliveryMode: String,
     onDeliveryModeChange: (String) -> Unit,
-    selectedBranch: Branch,
+    selectedBranch: Branch?,
     types:List<Type>,
     menus:List<Menu>,
     onBranchClick: () -> Unit,
@@ -227,7 +266,7 @@ fun HomeScreen(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Pilih Toko",
+                        text = selectedBranch?.name ?: "Pilih Toko",
                         fontWeight = FontWeight.SemiBold,
                         color = Color(0xFF3D2518)
                     )
@@ -267,42 +306,44 @@ fun HomeScreen(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 // Category Tabs
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(types) { type ->
-                        CategoryChip(
-                            text = type.type_name,
-                            selected = selectedTypeId == type.id,
-                            onClick = { onCategoryChange(type.id) }
-                        )
+                if (types.isNotEmpty()) {
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(types) { type ->
+                            CategoryChip(
+                                text = type.type_name,
+                                selected = selectedTypeId == type.id,
+                                onClick = { onCategoryChange(type.id) }
+                            )
+                        }
                     }
                 }
             }
         }
 
         // Rekomendasi Produk Section
-        item {
-            Text(
-                text = "Rekomendasi Produk",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF3D2518),
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-            )
-        }
+        val recommendedProducts = menus.filter { it.type_id == 1 }.take(3)
 
-        item {
-            LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                contentPadding = PaddingValues(horizontal = 16.dp)
-            ) {
-                val recommendedProducts = menus.filter {
-                    it.type_id == 1
-                }.take(3)
+        if (recommendedProducts.isNotEmpty()) {
+            item {
+                Text(
+                    text = "Rekomendasi Produk",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF3D2518),
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                )
+            }
 
-                items(recommendedProducts) { product ->
-                    ProductCard(product, onProductClick)
+            item {
+                LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    contentPadding = PaddingValues(horizontal = 16.dp)
+                ) {
+                    items(recommendedProducts) { product ->
+                        ProductCard(product, onProductClick)
+                    }
                 }
             }
         }
@@ -320,20 +361,49 @@ fun HomeScreen(
 
         // Products Grid
         val filteredProducts = menus.filter { it.type_id == selectedTypeId }
-        items(filteredProducts.chunked(2)) { productPair ->
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 6.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                productPair.forEach { product ->
-                    Box(modifier = Modifier.weight(1f)) {
-                        ProductCard(product, onProductClick)
+
+        if (filteredProducts.isEmpty()) {
+            item {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(32.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = null,
+                            modifier = Modifier.size(64.dp),
+                            tint = Color.Gray
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = "Tidak ada produk",
+                            fontSize = 16.sp,
+                            color = Color.Gray
+                        )
                     }
                 }
-                if (productPair.size == 1) {
-                    Spacer(modifier = Modifier.weight(1f))
+            }
+        } else {
+            items(filteredProducts.chunked(2)) { productPair ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 6.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    productPair.forEach { product ->
+                        Box(modifier = Modifier.weight(1f)) {
+                            ProductCard(product, onProductClick)
+                        }
+                    }
+                    if (productPair.size == 1) {
+                        Spacer(modifier = Modifier.weight(1f))
+                    }
                 }
             }
         }
@@ -420,7 +490,7 @@ fun ProductCard(product: Menu, onClick: (Menu) -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "",
+                text = "🍰",
                 fontSize = 60.sp,
                 modifier = Modifier.padding(16.dp)
             )
@@ -444,7 +514,7 @@ fun ProductCard(product: Menu, onClick: (Menu) -> Unit) {
 @Composable
 fun BranchSelectionDialog(
     branches: List<Branch>,
-    selectedBranch: Branch,
+    selectedBranch: Branch?,
     onBranchSelected: (Branch) -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -461,13 +531,29 @@ fun BranchSelectionDialog(
                     color = Color(0xFF3D2518)
                 )
                 Spacer(modifier = Modifier.height(16.dp))
-                branches.forEach { branch ->
-                    BranchItem(
-                        branch = branch,
-                        isSelected = branch.id == selectedBranch.id,
-                        onClick = { onBranchSelected(branch) }
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
+
+                if (branches.isEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(32.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "Tidak ada toko tersedia",
+                            color = Color.Gray,
+                            fontSize = 14.sp
+                        )
+                    }
+                } else {
+                    branches.forEach { branch ->
+                        BranchItem(
+                            branch = branch,
+                            isSelected = branch.id == selectedBranch?.id,
+                            onClick = { onBranchSelected(branch) }
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
                 }
             }
         }
@@ -557,7 +643,7 @@ fun ProductDetailDialog(
                             .background(Color(0xFFF5EFE7)),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(text = "\uD83C\uDF70", fontSize = 100.sp)
+                        Text(text = "🍰", fontSize = 100.sp)
                     }
 
                     // Product Info
@@ -582,21 +668,6 @@ fun ProductDetailDialog(
                             color = Color.Gray,
                             lineHeight = 20.sp
                         )
-//                        Spacer(modifier = Modifier.height(12.dp))
-//                        Text(
-//                            text = "Berat: ±${product.weight} gram",
-//                            fontSize = 14.sp,
-//                            color = Color(0xFF3D2518)
-//                        )
-//                        if (product.ingredients.isNotEmpty()) {
-//                            Spacer(modifier = Modifier.height(8.dp))
-//                            Text(
-//                                text = "Komposisi: ${product.ingredients}",
-//                                fontSize = 14.sp,
-//                                color = Color(0xFF3D2518),
-//                                lineHeight = 20.sp
-//                            )
-//                        }
                     }
                 }
 
@@ -645,52 +716,80 @@ fun CartDialog(
                         fontWeight = FontWeight.SemiBold,
                         color = Color(0xFF3D2518)
                     )
-                    TextButton(onClick = onClearCart) {
-                        Text("Clear all", color = Color(0xFF6B4E3D))
+                    if (cartItems.isNotEmpty()) {
+                        TextButton(onClick = onClearCart) {
+                            Text("Clear all", color = Color(0xFF6B4E3D))
+                        }
                     }
                 }
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                cartItems.forEach { cartItem ->
-                    CartItemRow(
-                        cartItem = cartItem,
-                        onQuantityChange = onQuantityChange
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-                }
-
-                Divider(color = Color(0xFFE0D5C7))
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Default.ShoppingCart,
-                            contentDescription = null,
-                            tint = Color(0xFF6B4E3D)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = "Rp ${cartItems.sumOf { it.menu.price * it.quantity }.formatPrice()}",
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFF3D2518)
-                        )
-                    }
-                    Button(
-                        onClick = onBuy,
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF6B4E3D)
-                        ),
-                        shape = RoundedCornerShape(12.dp)
+                if (cartItems.isEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(32.dp),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Text("Buy")
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.ShoppingCart,
+                                contentDescription = null,
+                                modifier = Modifier.size(64.dp),
+                                tint = Color.Gray
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text(
+                                text = "Keranjang kosong",
+                                fontSize = 16.sp,
+                                color = Color.Gray
+                            )
+                        }
+                    }
+                } else {
+                    cartItems.forEach { cartItem ->
+                        CartItemRow(
+                            cartItem = cartItem,
+                            onQuantityChange = onQuantityChange
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                    }
+
+                    Divider(color = Color(0xFFE0D5C7))
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Default.ShoppingCart,
+                                contentDescription = null,
+                                tint = Color(0xFF6B4E3D)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Rp ${cartItems.sumOf { it.menu.price * it.quantity }.formatPrice()}",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF3D2518)
+                            )
+                        }
+                        Button(
+                            onClick = onBuy,
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFF6B4E3D)
+                            ),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Text("Buy")
+                        }
                     }
                 }
             }
@@ -715,7 +814,7 @@ fun CartItemRow(cartItem: CartItem, onQuantityChange: (Int, Int) -> Unit) {
                     .background(Color(0xFFF5EFE7), RoundedCornerShape(12.dp)),
                 contentAlignment = Alignment.Center
             ) {
-                Text(text = "\uD83C\uDF70", fontSize = 30.sp)
+                Text(text = "🍰", fontSize = 30.sp)
             }
             Spacer(modifier = Modifier.width(12.dp))
             Column {

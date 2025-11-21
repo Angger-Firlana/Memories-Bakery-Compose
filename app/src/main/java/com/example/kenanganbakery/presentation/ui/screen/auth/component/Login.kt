@@ -1,5 +1,6 @@
 package com.example.kenanganbakery.presentation.ui.screen.auth.component
 
+import android.content.Context
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -16,6 +17,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.kenanganbakery.domain.models.auth.LoginRequest
@@ -26,6 +28,7 @@ import com.example.kenanganbakery.presentation.viewmodel.AuthViewModel
 
 @Composable
 fun Login(modifier: Modifier = Modifier, viewModel:AuthViewModel) {
+    val context: Context = LocalContext.current
     var input by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     Column(
@@ -80,7 +83,8 @@ fun Login(modifier: Modifier = Modifier, viewModel:AuthViewModel) {
                     LoginRequest(
                         login = input,
                         password = password
-                    )
+                    ),
+                    context = context
                 )
             },
             colors = ButtonDefaults.buttonColors(

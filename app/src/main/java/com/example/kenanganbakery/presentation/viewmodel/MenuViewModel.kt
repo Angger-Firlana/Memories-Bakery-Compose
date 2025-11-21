@@ -4,6 +4,7 @@ import com.example.kenanganbakery.data.repository.MenuRepository
 
 import android.app.Application
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.kenanganbakery.data.repository.BranchRepository
@@ -33,7 +34,7 @@ class MenuViewModel(application:Application):AndroidViewModel(application) {
                     _menus.value = it.data
                 },
                 onFailure = {
-
+                    Log.e("ViewModelError", "Menu get error: ${it.message}")
                 }
             )
         }
