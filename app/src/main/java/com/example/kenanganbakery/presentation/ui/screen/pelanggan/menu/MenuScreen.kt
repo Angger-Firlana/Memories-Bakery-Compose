@@ -871,3 +871,7 @@ fun CartItemRow(cartItem: CartItem, onQuantityChange: (Int, Int) -> Unit) {
 fun Int.formatPrice(): String {
     return "%,d".format(this).replace(',', '.')
 }
+
+fun Double.formatPrice(): String {
+    return "%,.0f".format(this).replace(',', '.')
+}

@@ -8,6 +8,6 @@ val BrownLight = Color(0xFFD9C3A4)
 val BrownText = Color(0xFF4B342A)
 
 // Neutrals
-val CreamBackground = Color(0xFFF5E9D5)
+val CreamBackground = Color(0xFFFFFFFF)
 val SurfaceWhite = Color(0xFFFFFFFF)
 val OutlineLight = Color(0xFFE6DED5)

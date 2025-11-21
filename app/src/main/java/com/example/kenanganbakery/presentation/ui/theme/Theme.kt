@@ -40,7 +40,7 @@ private val LightColorScheme = lightColorScheme(
     primaryContainer = BrownLight,
     onPrimaryContainer = BrownText,
 
-    background = CreamBackground,
+    background = Color.White,
     onBackground = BrownText,
 
     surface = SurfaceWhite,
@@ -49,7 +49,7 @@ private val LightColorScheme = lightColorScheme(
     outline = OutlineLight,
 
     secondary = BrownLight,
-    tertiary = BrownPrimary
+    tertiary = CreamBackground
 )
 
 

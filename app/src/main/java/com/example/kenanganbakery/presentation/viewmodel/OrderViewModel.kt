@@ -22,8 +22,8 @@ class OrderViewModel(application:Application):AndroidViewModel(application) {
     private val _state = MutableStateFlow<Boolean?>(null)
     val state = _state.asStateFlow()
 
-    private val _menus = MutableStateFlow<List<Order>>(emptyList())
-    val menus = _menus.asStateFlow()
+    private val _orders = MutableStateFlow<List<Order>>(emptyList())
+    val orders = _orders.asStateFlow()
 
     fun getAllOrders(
         category:String?=null,
@@ -33,7 +33,7 @@ class OrderViewModel(application:Application):AndroidViewModel(application) {
             val result = repository.getAllOrders()
             result.fold(
                 onSuccess = {
-                    _menus.value = it.data
+                    _orders.value = it.data
                 },
                 onFailure = {
 

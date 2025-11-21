@@ -128,7 +128,9 @@ fun AppNavigation(
 
             composable(Screen.History.route) {
                 showBottomBar = true
-                HistoryScreen()
+                HistoryScreen(
+                    orderViewModel
+                )
             }
 
             composable(Screen.Profile.route){

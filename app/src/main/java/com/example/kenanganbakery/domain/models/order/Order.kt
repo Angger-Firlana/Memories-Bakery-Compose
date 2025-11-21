@@ -1,5 +1,8 @@
 package com.example.kenanganbakery.domain.models.order
 
+import com.example.kenanganbakery.domain.models.branch.Branch
+import com.example.kenanganbakery.domain.models.menu.Menu
+
 // ===========================
 // RESPONSE MODELS
 // ===========================
@@ -30,8 +33,20 @@ data class Order(
     val address: String,
     val customer_phone: String,
     val status: String,
+    val total:String,
+    val branch: Branch?= null,
+    val order_details: List<OrderDetail>?=null,
     val created_at: String?,
     val updated_at: String?
+)
+
+data class OrderDetail(
+    val id: Int,
+    val order_id: Int,
+    val menu_id: Int,
+    val quantity: Int,
+    val sub_total: Int,
+    val menu: Menu
 )
 
 data class PostOrderRequest(

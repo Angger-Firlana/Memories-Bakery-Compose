@@ -22,9 +22,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.kenanganbakery.domain.models.order.Order
+import com.example.kenanganbakery.presentation.ui.screen.pelanggan.history.component.OrderCard
 import com.example.kenanganbakery.domain.models.tab.TabBarItem
 import com.example.kenanganbakery.presentation.ui.component.text.ModernText
 import com.example.kenanganbakery.presentation.ui.screen.pelanggan.menu.formatPrice
+import com.example.kenanganbakery.presentation.viewmodel.OrderViewModel
 
 // Data Classes
 data class OrderItem(
@@ -33,16 +36,6 @@ data class OrderItem(
     val quantity: Int
 )
 
-data class Order(
-    val id: Int,
-    val date: String,
-    val status: String,
-    val items: List<OrderItem>,
-    val total: Int,
-    val deliveryAddress: String,
-    val deliveryDate: String,
-    val paymentMethod: String
-)
 
 data class PaymentItem(
     val name: String,
@@ -52,17 +45,17 @@ data class PaymentItem(
 )
 
 @Composable
-fun HistoryScreen() {
+fun HistoryScreen(orderViewModel: OrderViewModel) {
     var currentView by remember { mutableStateOf("history") }
 
     when (currentView) {
-        "history" -> OrderHistoryScreen(onOrderClick = { currentView = "detail" })
+        "history" -> OrderHistoryScreen(onOrderClick = { currentView = "detail" }, orderViewModel = orderViewModel)
         "detail" -> DetailPesananScreen(onBackClick = { currentView = "history" })
     }
 }
 
 @Composable
-fun OrderHistoryScreen(onOrderClick: () -> Unit) {
+fun OrderHistoryScreen(onOrderClick: () -> Unit, orderViewModel:OrderViewModel) {
     var selectedTabIndex by remember { mutableStateOf(0) }
 
     val tabs = listOf(
@@ -84,26 +77,12 @@ fun OrderHistoryScreen(onOrderClick: () -> Unit) {
         )
     )
 
-    val orders = listOf(
-        Order(
-            1, "December 28th, 2022", "Completed",
-            listOf(
-                OrderItem("Caffe Mocha", "Regular", 1),
-                OrderItem("Hazelnut Latte", "Regular", 1)
-            ),
-            10000, "Jl. Kpg Sutoyo", "2025-10-21", "Kartu Debit/Kredit"
-        ),
-        Order(
-            2, "December 29th, 2022", "Completed",
-            listOf(OrderItem("Flat White", "Regular", 1)),
-            8000, "Jl. Kpg Sutoyo", "2025-10-21", "Kartu Debit/Kredit"
-        ),
-        Order(
-            3, "December 29th, 2022", "Completed",
-            listOf(OrderItem("Caramel Macchiato", "Regular", 1)),
-            12000, "Jl. Kpg Sutoyo", "2025-10-21", "Kartu Debit/Kredit"
-        )
-    )
+    val orders by orderViewModel.orders.collectAsState()
+
+    LaunchedEffect(Unit) {
+        orderViewModel.getAllOrders()
+    }
+
 
     Column(
         modifier = Modifier
@@ -170,124 +149,7 @@ fun OrderHistoryScreen(onOrderClick: () -> Unit) {
     }
 }
 
-@Composable
-fun OrderCard(order: Order, onClick: () -> Unit) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth().background(Color.LightGray.copy(alpha = 0.5f), shape = RoundedCornerShape(16.dp)).padding(8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .clip(CircleShape)
-                            .background(Color(0xFFFFF8E1)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(24.dp)
-                                .clip(RoundedCornerShape(4.dp))
-                                .background(Color(0xFFB8860B))
-                        )
-                    }
 
-
-                    Column {
-                        ModernText(
-                            text = "Kenangan Bakery - TMII",
-                            size = 12,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-
-                    }
-
-                    Spacer(Modifier.weight(1f))
-                    Card(
-                        colors = CardDefaults.cardColors(
-                            containerColor = Color.LightGray,
-                            contentColor = Color.Black
-                        )
-                    ) {
-                        ModernText(
-                            modifier = Modifier.padding(12.dp),
-                            text = order.status,
-                            size = 12
-                        )
-                    }
-
-                }
-
-
-            }
-
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Row(Modifier.fillMaxWidth()) {
-                Column(
-                    Modifier.weight(1f)
-                ) {
-                    ModernText(
-                        text = "Total Harga: ",
-                        color = Color.Gray,
-                        size = 12
-                    )
-                    ModernText(
-                        text = "Tanggal pesanan: ",
-                        color = Color.Gray,
-                        size = 12
-                    )
-                    ModernText(
-                        text = "Status ",
-                        color = Color.Gray,
-                        size = 12
-                    )
-                }
-
-                Column(
-                    Modifier.weight(1f),
-                    horizontalAlignment = Alignment.End
-                ) {
-                    ModernText(
-                        text = "Rp ${order.total.formatPrice()}",
-                        size = 12,
-                        weight = FontWeight.Bold
-                    )
-                    ModernText(
-                        text = order.date,
-                        size = 12,
-                        weight = FontWeight.Bold
-                    )
-                    ModernText(
-                        text = order.status,
-                        size = 12,
-                        weight = FontWeight.Bold
-                    )
-                }
-
-
-
-            }
-        }
-    }
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
