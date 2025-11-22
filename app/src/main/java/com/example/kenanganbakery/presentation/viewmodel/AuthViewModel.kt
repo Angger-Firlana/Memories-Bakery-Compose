@@ -5,6 +5,7 @@ import android.content.Context
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.kenanganbakery.data.local.BranchManager
 import com.example.kenanganbakery.data.local.TokenManager
 import com.example.kenanganbakery.data.local.UserManager
 import com.example.kenanganbakery.data.repository.AuthRepository
@@ -29,12 +30,14 @@ class AuthViewModel(application:Application):AndroidViewModel(application) {
         viewModelScope.launch {
             val userManager = UserManager(context)
             val tokenManager = TokenManager(context)
+            val branchManager = BranchManager(context)
             val result = repository.login(request)
             _isLoading.value = true
             result.fold(
                 onSuccess = { body ->
                     userManager.saveUser(body.user)
                     tokenManager.saveToken(body.token)
+                    branchManager.setBranch(body.branch)
                     _state.value = true
                 },
                 onFailure = {

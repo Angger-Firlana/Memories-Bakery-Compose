@@ -32,4 +32,8 @@ class UserManager(context:Context) {
         val userStr = sharedPref.getString("user",null)
         return gson.fromJson(userStr,User::class.java)
     }
+
+    fun clearUser(){
+        sharedPref.edit().remove("user").apply()
+    }
 }

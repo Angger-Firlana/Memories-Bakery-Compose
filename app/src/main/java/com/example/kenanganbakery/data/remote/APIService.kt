@@ -11,10 +11,14 @@ import com.example.kenanganbakery.domain.models.order.GetOrderResponse
 import com.example.kenanganbakery.domain.models.order.HitOrderResponse
 import com.example.kenanganbakery.domain.models.order.PostOrderRequest
 import com.example.kenanganbakery.domain.models.order.UpdateOrderRequest
+import com.example.kenanganbakery.domain.models.production_schedule.GetProductionScheduleResponse
+import com.example.kenanganbakery.domain.models.production_schedule.HitProductionScheduleResponse
+import com.example.kenanganbakery.domain.models.production_schedule.PatchStatusProductionScheduleRequest
 import com.example.kenanganbakery.domain.models.type.GetTypeResponse
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
@@ -62,4 +66,15 @@ interface APIService {
 
     @PUT("orders/{id}")
     suspend fun putOrder(@Body request:UpdateOrderRequest):Response<HitOrderResponse>
+
+    //
+    @GET("production-schedule")
+    suspend fun indexProductionSchedule(
+        @Query("search") search: String? = null,
+        @Query("date") date: String? = null
+    ): Response<GetProductionScheduleResponse>
+
+    @PATCH("orders/{id}")
+    suspend fun patchStatusProductionSchedule(@Body request:PatchStatusProductionScheduleRequest):Response<HitProductionScheduleResponse>
+
 }
