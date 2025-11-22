@@ -6,6 +6,7 @@ import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.kenanganbakery.data.local.TokenManager
+import com.example.kenanganbakery.data.local.UserManager
 import com.example.kenanganbakery.data.repository.AuthRepository
 import com.example.kenanganbakery.domain.models.auth.LoginRequest
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,19 +27,18 @@ class AuthViewModel(application:Application):AndroidViewModel(application) {
         context:Context
     ){
         viewModelScope.launch {
+            val userManager = UserManager(context)
             val tokenManager = TokenManager(context)
             val result = repository.login(request)
             _isLoading.value = true
             result.fold(
-                onSuccess = {
-                    tokenManager.saveToken(it.token)
+                onSuccess = { body ->
+                    userManager.saveUser(body.user)
+                    tokenManager.saveToken(body.token)
                     _state.value = true
-
-                    Log.d("AuthViewModel", it.toString())
                 },
                 onFailure = {
                     _state.value = false
-                    Log.e("AuthViewModel", it.toString())
                 }
             )
 

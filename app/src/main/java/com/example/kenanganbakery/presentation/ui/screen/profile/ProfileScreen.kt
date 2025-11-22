@@ -25,14 +25,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.kenanganbakery.R
+import com.example.kenanganbakery.data.local.UserManager
 import com.example.kenanganbakery.domain.models.tab.SettingTabItem
 import com.example.kenanganbakery.presentation.ui.component.text.ModernText
 
 @Composable
 fun ProfileScreen(modifier: Modifier = Modifier) {
+    val context = LocalContext.current
+    val userManager = UserManager(context)
+    val user = userManager.getUser()
     val settingItems = listOf(
         SettingTabItem(
             title = "Edit Profile",
@@ -69,7 +74,7 @@ fun ProfileScreen(modifier: Modifier = Modifier) {
                     )
 
                     ModernText(
-                        text = "Profile",
+                        text = user?.username?:"Unknown Name",
                         size = 22
                     )
                 }

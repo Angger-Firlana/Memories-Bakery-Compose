@@ -17,7 +17,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.kenanganbakery.data.local.TokenManager
+import com.example.kenanganbakery.data.local.UserManager
 import com.example.kenanganbakery.data.local.WelcomeManager
+import com.example.kenanganbakery.domain.models.user.User
 import com.example.kenanganbakery.presentation.ui.component.bar.BottomBar
 import com.example.kenanganbakery.presentation.ui.screen.auth.AuthScreen
 import com.example.kenanganbakery.presentation.ui.screen.pelanggan.dashboard.DashboardScreen
@@ -36,6 +38,7 @@ fun AppNavigation(
     navController: NavHostController = rememberNavController()
 ) {
     val context = LocalContext.current
+    val userManager = UserManager(context)
     val tokenManager = TokenManager(context)
     val welcomeManager = WelcomeManager(context)
     val authViewModel: AuthViewModel = viewModel(
@@ -64,22 +67,18 @@ fun AppNavigation(
     Scaffold(
         bottomBar = {
             if (showBottomBar){
+
                 val navBackStackEntry = navController.currentBackStackEntry
                 val currentDestination = navBackStackEntry?.destination
 
                 // tampilkan bottom bar hanya di 4 screen utama
-                if (currentDestination?.route in listOf(
-                        Screen.Dashboard.route,
-                        Screen.Menu.route,
-                        Screen.History.route,
-                        Screen.Profile.route
-                    )
-                ) {
-                    BottomBar(
-                        navController = navController,
-                        currentDestination = currentDestination
-                    )
-                }
+
+                        BottomBar(
+                            navController = navController,
+                            currentDestination = currentDestination
+                        )
+
+
             }
 
         }

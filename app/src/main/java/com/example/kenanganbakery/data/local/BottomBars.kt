@@ -31,4 +31,22 @@ object BottomBarData{
             icon = Icons.Default.PersonPin
         )
     )
+
+    val listBottomBarPetugas = listOf(
+        BottomBarItem(
+            title= "Dashboard",
+            route = Screen.DashboardPetugas.route,
+            icon = Icons.Default.Home
+        ),
+        BottomBarItem(
+            title= "History",
+            route = Screen.HistoryPetugas.route,
+            icon = Icons.Default.History
+        ),
+        BottomBarItem(
+            title= "Profile",
+            route = Screen.Profile.route,
+            icon = Icons.Default.PersonPin
+        )
+    )
 }

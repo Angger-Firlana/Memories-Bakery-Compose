@@ -6,5 +6,8 @@ sealed class Screen(val route:String) {
     data object Dashboard:Screen("dashboard")
     data object Menu:Screen("menu")
     data object History:Screen("history")
+
+    data object DashboardPetugas:Screen("dashboard_petugas")
+    data object HistoryPetugas:Screen("history_petugas")
     data object Profile:Screen("profile")
 }
