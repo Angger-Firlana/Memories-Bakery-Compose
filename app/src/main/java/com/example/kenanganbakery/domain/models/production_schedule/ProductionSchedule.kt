@@ -13,7 +13,7 @@ data class ProductionSchedule(
     val branch_id:Int,
     val schedule_date:String,
     val status:String,
-    val production_details: List<ProductionScheduleDetail>,
+    val production_schedule_details: List<ProductionScheduleDetail>,
 
 )
 
@@ -22,7 +22,8 @@ data class ProductionScheduleDetail(
     val production_schedule_id:Int,
     val menu_id:Int,
     val quantity:Int,
-    val menu: Menu
+    val menu: Menu,
+    val status: String
 )
 
 data class PatchStatusProductionScheduleRequest(

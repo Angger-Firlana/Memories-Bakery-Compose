@@ -25,12 +25,15 @@ import com.example.kenanganbakery.presentation.ui.screen.auth.AuthScreen
 import com.example.kenanganbakery.presentation.ui.screen.pelanggan.dashboard.DashboardScreen
 import com.example.kenanganbakery.presentation.ui.screen.pelanggan.history.HistoryScreen
 import com.example.kenanganbakery.presentation.ui.screen.pelanggan.menu.MenuScreen
+import com.example.kenanganbakery.presentation.ui.screen.petugas.dashboard.DashboardPetugasScreen
+import com.example.kenanganbakery.presentation.ui.screen.petugas.history.HistoryPetugasScreen
 import com.example.kenanganbakery.presentation.ui.screen.profile.ProfileScreen
 import com.example.kenanganbakery.presentation.ui.screen.splash.welcome.WelcomeScreen
 import com.example.kenanganbakery.presentation.viewmodel.AuthViewModel
 import com.example.kenanganbakery.presentation.viewmodel.BranchViewModel
 import com.example.kenanganbakery.presentation.viewmodel.MenuViewModel
 import com.example.kenanganbakery.presentation.viewmodel.OrderViewModel
+import com.example.kenanganbakery.presentation.viewmodel.ProductionScheduleViewModel
 import com.example.kenanganbakery.presentation.viewmodel.TypeViewModel
 
 @Composable
@@ -41,11 +44,18 @@ fun AppNavigation(
     val userManager = UserManager(context)
     val tokenManager = TokenManager(context)
     val welcomeManager = WelcomeManager(context)
+
+    val role = userManager.getUser()?.role
+
     val authViewModel: AuthViewModel = viewModel(
         factory = ViewModelProvider.AndroidViewModelFactory.getInstance(application = context.applicationContext as Application)
     )
 
     val orderViewModel:OrderViewModel = viewModel(
+        factory = ViewModelProvider.AndroidViewModelFactory.getInstance(application = context.applicationContext as Application)
+    )
+
+    val productionScheduleViewModel:ProductionScheduleViewModel = viewModel(
         factory = ViewModelProvider.AndroidViewModelFactory.getInstance(application = context.applicationContext as Application)
     )
 
@@ -62,7 +72,18 @@ fun AppNavigation(
     )
 
     var showBottomBar by remember {mutableStateOf(false )}
-    val checkStartLogin = if(tokenManager.getToken() != null) Screen.Dashboard.route else Screen.Auth.route
+    val checkStartLogin = if(tokenManager.getToken() != null){
+        if (role?.id == 3){
+            Screen.Dashboard.route
+
+        }else if (role?.id == 2){
+            Screen.DashboardPetugas.route
+        } else {
+            Screen.Dashboard.route
+        }
+    } else {
+        Screen.Auth.route
+    }
     val startDestination = if (welcomeManager.getStateWelcome()) Screen.Welcome.route else checkStartLogin
     Scaffold(
         bottomBar = {
@@ -73,11 +94,10 @@ fun AppNavigation(
 
                 // tampilkan bottom bar hanya di 4 screen utama
 
-                        BottomBar(
-                            navController = navController,
-                            currentDestination = currentDestination
-                        )
-
+                BottomBar(
+                    navController = navController,
+                    currentDestination = currentDestination
+                )
 
             }
 
@@ -93,9 +113,16 @@ fun AppNavigation(
                 AuthScreen(
                     viewModel = authViewModel,
                     onLogin = {
-                        navController.navigate(Screen.Dashboard.route){
-                            popUpTo(navController.graph.startDestinationId){inclusive = true}
+                        if (role?.id == 3){
+                            navController.navigate(Screen.Dashboard.route){
+                                popUpTo(navController.graph.startDestinationId){inclusive = true}
+                            }
+                        }else{
+                            navController.navigate(Screen.DashboardPetugas.route){
+                                popUpTo(navController.graph.startDestinationId){inclusive = true}
+                            }
                         }
+
                     }
                 )
             }
@@ -115,6 +142,13 @@ fun AppNavigation(
                 DashboardScreen()
             }
 
+            composable(Screen.HistoryPetugas.route){
+                showBottomBar = true
+                HistoryPetugasScreen(
+                    productionScheduleViewModel = productionScheduleViewModel
+                )
+            }
+
             composable(Screen.Menu.route) {
                 showBottomBar = true
                 MenuScreen(
@@ -122,6 +156,13 @@ fun AppNavigation(
                     menuViewModel = menuViewModel,
                     orderViewModel = orderViewModel,
                     typeViewModel = typeViewModel
+                )
+            }
+
+            composable(Screen.DashboardPetugas.route) {
+                showBottomBar = true
+                DashboardPetugasScreen(
+                    productionScheduleViewModel = productionScheduleViewModel
                 )
             }
 
@@ -134,7 +175,13 @@ fun AppNavigation(
 
             composable(Screen.Profile.route){
                 showBottomBar = true
-                ProfileScreen()
+                ProfileScreen(
+                    backToLogin = {
+                        navController.navigate(Screen.Auth.route){
+                            popUpTo(navController.graph.startDestinationId){inclusive = true}
+                        }
+                    }
+                )
             }
 
         }

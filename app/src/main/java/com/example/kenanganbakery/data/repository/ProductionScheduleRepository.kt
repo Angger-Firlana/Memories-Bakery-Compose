@@ -36,10 +36,37 @@ class ProductionScheduleRepository(context:Context) {
     }
 
     suspend fun updateStatus(
+        id:Int,
         request:PatchStatusProductionScheduleRequest
     ):Result<HitProductionScheduleResponse>{
         return try{
-            val response = api.patchStatusProductionSchedule(request)
+            val response = api.patchStatusProductionSchedule(request,id)
+
+            if (response.isSuccessful){
+                val body = response.body()
+
+                if(body != null){
+                    Result.success(body)
+                }else{
+                    Result.failure(Exception("Response body is null"))
+                }
+            }else{
+                Result.failure(
+                    Exception("Request failed with code ${response.code()} - ${response.message()}\nServer Response: ${response.errorBody()?.string()}")
+                )
+            }
+        }catch (e:Exception){
+            Result.failure(e)
+        }
+
+    }
+
+    suspend fun updateStatusDetail(
+        id:Int,
+        request:PatchStatusProductionScheduleRequest
+    ):Result<HitProductionScheduleResponse>{
+        return try{
+            val response = api.patchStatusProductionScheduleDetail(request,id)
 
             if (response.isSuccessful){
                 val body = response.body()

@@ -30,7 +30,7 @@ fun BottomBar(
         containerColor = MaterialTheme.colorScheme.primary,
         contentColor = Color.White
     ) {
-        val bottomBarItems = if (user.role_id == 3) BottomBarData.listBottomBar else if (user.role_id == 2) BottomBarData.listBottomBarPetugas else TODO()
+        val bottomBarItems = if (user.role_id == 3) BottomBarData.listBottomBar else if (user.role_id == 2) BottomBarData.listBottomBarPetugas else if(user.role_id == 5) BottomBarData.listBottomBarKurir else TODO()
         bottomBarItems.forEachIndexed { index, item ->
             val selected = selectedIndex == index
 

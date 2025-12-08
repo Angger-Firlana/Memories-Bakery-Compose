@@ -12,12 +12,20 @@ data class GetMenuResponse(
     val data: List<Menu>
 )
 
+data class GetMenuDetailResponse(
+    val success:Boolean,
+    val message:String,
+    val data: Menu
+)
+
+
 data class Menu(
     val id:Int,
     val type_id:Int,
     val branch_id:Int,
     val name:String,
     val price:Int,
+    val photo_url:String?,
     val description:String,
     val validDuration:Int,
     val branch: Branch?=null

@@ -1,9 +1,12 @@
 package com.example.kenanganbakery.data.repository
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import com.example.kenanganbakery.data.remote.APIClient
 import com.example.kenanganbakery.domain.models.auth.LoginRequest
 import com.example.kenanganbakery.domain.models.auth.LoginResponse
+import com.example.kenanganbakery.domain.models.menu.GetMenuDetailResponse
 import com.example.kenanganbakery.domain.models.menu.GetMenuResponse
 
 class MenuRepository(context:Context) {
@@ -38,6 +41,47 @@ class MenuRepository(context:Context) {
                 Exception("Network/Unexpected error: ${e.localizedMessage ?: e.toString()}")
             )
         }
+    }
+
+    suspend fun getMenuImage(url:String):Result<Bitmap?>{
+        return try{
+            val response = api.getImage(url)
+            if (response.isSuccessful){
+                val body = response.body()
+                if (body != null){
+                    val stream = body.byteStream()
+                    val bitmap = BitmapFactory.decodeStream(stream)
+                    Result.success(bitmap)
+                }else{
+                    Result.failure(Exception("Bodynya kosong"))
+                }
+            }else{
+                Result.failure(Exception("Bodynya kosong"))
+            }
+        }catch (e:Exception){
+            Result.failure(
+                Exception("Network/Unexpected error: ${e.localizedMessage}")
+            )
+        }
+    }
+
+    suspend fun getMenu(id:Int):Result<GetMenuDetailResponse>{
+        return try {
+            val response = api.getMenu(id)
+            if (response.isSuccessful){
+                val body = response.body()
+                if (body != null){
+                    Result.success(body)
+                }else{
+                    Result.failure(Exception("Bodynya kosong"))
+                }
+            }else{
+                Result.failure(Exception("Bodynya kosong"))
+            }
+        }catch (e:Exception){
+            Result.failure(Exception("Network/Unexpected error: ${e.localizedMessage}"))
+        }
+
     }
 
 }

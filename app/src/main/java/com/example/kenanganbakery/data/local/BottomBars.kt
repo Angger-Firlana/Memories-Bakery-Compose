@@ -49,4 +49,22 @@ object BottomBarData{
             icon = Icons.Default.PersonPin
         )
     )
+
+    val listBottomBarKurir = listOf(
+        BottomBarItem(
+            title= "Dashboard",
+            route = Screen.DashboardKurir.route,
+            icon = Icons.Default.Home
+        ),
+        BottomBarItem(
+            title= "History",
+            route = Screen.HistoryKurir.route,
+            icon = Icons.Default.History
+        ),
+        BottomBarItem(
+            title= "Profile",
+            route = Screen.Profile.route,
+            icon = Icons.Default.PersonPin
+        )
+    )
 }

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -16,6 +17,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PersonPin
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -29,14 +31,19 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.kenanganbakery.R
+import com.example.kenanganbakery.data.local.BranchManager
+import com.example.kenanganbakery.data.local.TokenManager
 import com.example.kenanganbakery.data.local.UserManager
 import com.example.kenanganbakery.domain.models.tab.SettingTabItem
+import com.example.kenanganbakery.presentation.ui.component.button.ModernButton
 import com.example.kenanganbakery.presentation.ui.component.text.ModernText
 
 @Composable
-fun ProfileScreen(modifier: Modifier = Modifier) {
+fun ProfileScreen(modifier: Modifier = Modifier, backToLogin:()-> Unit) {
     val context = LocalContext.current
     val userManager = UserManager(context)
+    val tokenManager = TokenManager(context)
+    val branchManager = BranchManager(context)
     val user = userManager.getUser()
     val settingItems = listOf(
         SettingTabItem(
@@ -70,7 +77,7 @@ fun ProfileScreen(modifier: Modifier = Modifier) {
                     Image(
                         painter = painterResource(id = R.drawable.pp),
                         contentDescription = "Profile Picture",
-                        modifier = Modifier.size(120.dp).clip(CircleShape)
+                        modifier = Modifier.size(120.dp).padding(12.dp).clip(CircleShape)
                     )
 
                     ModernText(
@@ -114,6 +121,26 @@ fun ProfileScreen(modifier: Modifier = Modifier) {
                     HorizontalDivider()
                 }
             }
+
+            Spacer(Modifier.weight(1f))
+
+
+            ModernButton(
+                text = "Logout",
+                onClick = {
+                    backToLogin()
+
+                    userManager.clearUser()
+                    tokenManager.clearToken()
+                    branchManager.clearBranch()
+                    // Navigate to login screen
+
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.error.copy(0.9f)
+                ),
+                modifier = Modifier.height(90.dp).fillMaxWidth().padding(16.dp)
+            )
 
 
         }

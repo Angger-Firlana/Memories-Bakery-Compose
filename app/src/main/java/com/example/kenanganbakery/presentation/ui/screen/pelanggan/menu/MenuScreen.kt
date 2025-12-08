@@ -87,6 +87,7 @@ fun MenuScreen(
             }
             else -> {
                 HomeScreen(
+                    menuViewModel = menuViewModel,
                     deliveryMode = deliveryMode,
                     onDeliveryModeChange = { deliveryMode = it },
                     selectedBranch = selectedBranch,
@@ -217,6 +218,7 @@ fun LoadingOrEmptyState() {
 
 @Composable
 fun HomeScreen(
+    menuViewModel:MenuViewModel,
     deliveryMode: String,
     onDeliveryModeChange: (String) -> Unit,
     selectedBranch: Branch?,
@@ -349,7 +351,7 @@ fun HomeScreen(
                     contentPadding = PaddingValues(horizontal = 16.dp)
                 ) {
                     items(recommendedProducts) { product ->
-                        ProductCard(product, onProductClick)
+                        ProductCard(product, menuViewModel, onProductClick)
                     }
                 }
             }
@@ -403,7 +405,7 @@ fun HomeScreen(
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     Box(modifier = Modifier.weight(1f)) {
-                        ProductHorizontalCard(productPair, onProductClick)
+                        ProductHorizontalCard(productPair,menuViewModel, onProductClick)
                     }
                 }
             }

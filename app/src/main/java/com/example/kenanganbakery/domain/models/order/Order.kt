@@ -38,11 +38,11 @@ data class Order(
     val address: String,
     val customer_phone: String,
     val status: String,
-    val total:String,
+    val total:String?=null,
     val branch: Branch?= null,
     val order_details: List<OrderDetail>?=null,
-    val created_at: String?,
-    val updated_at: String?
+    val created_at: String?=null,
+    val updated_at: String?=null
 )
 
 data class OrderDetail(

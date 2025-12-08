@@ -5,6 +5,7 @@ import com.example.kenanganbakery.domain.models.auth.LoginResponse
 import com.example.kenanganbakery.domain.models.auth.RegisterRequest
 import com.example.kenanganbakery.domain.models.auth.RegisterResponse
 import com.example.kenanganbakery.domain.models.branch.GetBranchResponse
+import com.example.kenanganbakery.domain.models.menu.GetMenuDetailResponse
 import com.example.kenanganbakery.domain.models.menu.GetMenuResponse
 import com.example.kenanganbakery.domain.models.order.GetDetailOrderResponse
 import com.example.kenanganbakery.domain.models.order.GetOrderResponse
@@ -15,6 +16,7 @@ import com.example.kenanganbakery.domain.models.production_schedule.GetProductio
 import com.example.kenanganbakery.domain.models.production_schedule.HitProductionScheduleResponse
 import com.example.kenanganbakery.domain.models.production_schedule.PatchStatusProductionScheduleRequest
 import com.example.kenanganbakery.domain.models.type.GetTypeResponse
+import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -23,6 +25,7 @@ import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
 import retrofit2.http.Query
+import retrofit2.http.Url
 
 interface APIService {
     @POST("auth/login")
@@ -46,6 +49,12 @@ interface APIService {
         @Query("search") search: String? = null
     ): Response<GetMenuResponse>
 
+    @GET("menus/{id}")
+    suspend fun getMenu(@Path("id") id:Int):Response<GetMenuDetailResponse>
+
+    @GET
+    suspend fun getImage(@Url url:String):Response<ResponseBody>
+
 
     @GET("branchs")
     suspend fun indexBranch(
@@ -68,13 +77,17 @@ interface APIService {
     suspend fun putOrder(@Body request:UpdateOrderRequest):Response<HitOrderResponse>
 
     //
-    @GET("production-schedule")
+    @GET("production-schedules")
     suspend fun indexProductionSchedule(
         @Query("search") search: String? = null,
         @Query("date") date: String? = null
     ): Response<GetProductionScheduleResponse>
 
-    @PATCH("orders/{id}")
-    suspend fun patchStatusProductionSchedule(@Body request:PatchStatusProductionScheduleRequest):Response<HitProductionScheduleResponse>
+    @PATCH("production-schedules/details/{id}/status")
+    suspend fun patchStatusProductionScheduleDetail(@Body request:PatchStatusProductionScheduleRequest, @Path("id") id:Int):Response<HitProductionScheduleResponse>
+
+
+    @PATCH("production-schedules/{id}")
+    suspend fun patchStatusProductionSchedule(@Body request:PatchStatusProductionScheduleRequest, @Path("id") id:Int):Response<HitProductionScheduleResponse>
 
 }

@@ -1,6 +1,7 @@
 package com.example.kenanganbakery.presentation.viewmodel
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.kenanganbakery.data.repository.ProductionScheduleRepository
@@ -16,7 +17,7 @@ class ProductionScheduleViewModel(application: Application):AndroidViewModel(app
     private val _state = MutableStateFlow<Boolean?>(null)
     val state = _state.asStateFlow()
 
-    private val _schedules = MutableStateFlow<List<ProductionSchedule>>(emptyList())
+    private val _schedules = MutableStateFlow<List<ProductionSchedule>?>(null)
     val schedules = _schedules.asStateFlow()
 
     fun getAllSchedule(
@@ -38,11 +39,12 @@ class ProductionScheduleViewModel(application: Application):AndroidViewModel(app
     }
 
     fun updateStatus(
+        id:Int,
         status:String
     ){
         val request = PatchStatusProductionScheduleRequest(status = status)
         viewModelScope.launch {
-            val result = repository.updateStatus(request)
+            val result = repository.updateStatus(id, request)
 
             result.fold(
                 onSuccess = { body->
@@ -50,6 +52,26 @@ class ProductionScheduleViewModel(application: Application):AndroidViewModel(app
                 },
                 onFailure = {
                     _state.value = false
+                }
+            )
+        }
+    }
+
+    fun updateStatusDetail(
+        id:Int,
+        status:String
+    ){
+        val request = PatchStatusProductionScheduleRequest(status = status)
+        viewModelScope.launch {
+            val result = repository.updateStatusDetail(id, request)
+
+            result.fold(
+                onSuccess = { body->
+                    _state.value = true
+                },
+                onFailure = {
+                    _state.value = false
+                    Log.e("ProductionScheduleViewModel", "updateStatusDetail: $it")
                 }
             )
         }
