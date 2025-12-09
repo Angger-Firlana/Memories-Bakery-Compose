@@ -5,6 +5,9 @@ import com.example.kenanganbakery.domain.models.auth.LoginResponse
 import com.example.kenanganbakery.domain.models.auth.RegisterRequest
 import com.example.kenanganbakery.domain.models.auth.RegisterResponse
 import com.example.kenanganbakery.domain.models.branch.GetBranchResponse
+import com.example.kenanganbakery.domain.models.delivery.Delivery
+import com.example.kenanganbakery.domain.models.delivery.GetDeliveryResponse
+import com.example.kenanganbakery.domain.models.delivery.HitDeliveryResponse
 import com.example.kenanganbakery.domain.models.menu.GetMenuDetailResponse
 import com.example.kenanganbakery.domain.models.menu.GetMenuResponse
 import com.example.kenanganbakery.domain.models.order.GetDetailOrderResponse
@@ -89,5 +92,15 @@ interface APIService {
 
     @PATCH("production-schedules/{id}")
     suspend fun patchStatusProductionSchedule(@Body request:PatchStatusProductionScheduleRequest, @Path("id") id:Int):Response<HitProductionScheduleResponse>
+
+    //Delivery
+    @GET("deliveries/users/{id}")
+    suspend fun indexDeliveryByUser(@Path("id") id:Int):Response<GetDeliveryResponse>
+
+    @POST("deliveries")
+    suspend fun postDelivery(@Body request:Delivery):Response<HitDeliveryResponse>
+
+    @PATCH("deliveries/{id}")
+    suspend fun patchDelivery(@Path("id") id:Int,@Body request:Delivery):Response<HitDeliveryResponse>
 
 }

@@ -127,7 +127,7 @@ fun OrderCard(order: Order, onClick: () -> Unit) {
                     horizontalAlignment = Alignment.End
                 ) {
                     ModernText(
-                        text = "Rp ${order.total.toDoubleOrNull()?.formatPrice()}",
+                        text = "Rp ${order.total?.toDoubleOrNull()?.formatPrice()}",
                         size = 12,
                         weight = FontWeight.Bold
                     )

@@ -38,6 +38,7 @@ data class Order(
     val address: String,
     val customer_phone: String,
     val status: String,
+    val payment_method:String?=null,
     val total:String?=null,
     val branch: Branch?= null,
     val order_details: List<OrderDetail>?=null,

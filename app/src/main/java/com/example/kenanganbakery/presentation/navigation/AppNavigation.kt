@@ -1,6 +1,8 @@
 package com.example.kenanganbakery.presentation.navigation
 
 import android.app.Application
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -22,6 +24,7 @@ import com.example.kenanganbakery.data.local.WelcomeManager
 import com.example.kenanganbakery.domain.models.user.User
 import com.example.kenanganbakery.presentation.ui.component.bar.BottomBar
 import com.example.kenanganbakery.presentation.ui.screen.auth.AuthScreen
+import com.example.kenanganbakery.presentation.ui.screen.pelanggan.checkout.BakeryCheckoutScreen
 import com.example.kenanganbakery.presentation.ui.screen.pelanggan.dashboard.DashboardScreen
 import com.example.kenanganbakery.presentation.ui.screen.pelanggan.history.HistoryScreen
 import com.example.kenanganbakery.presentation.ui.screen.pelanggan.menu.MenuScreen
@@ -36,6 +39,7 @@ import com.example.kenanganbakery.presentation.viewmodel.OrderViewModel
 import com.example.kenanganbakery.presentation.viewmodel.ProductionScheduleViewModel
 import com.example.kenanganbakery.presentation.viewmodel.TypeViewModel
 
+@RequiresApi(Build.VERSION_CODES.BAKLAVA)
 @Composable
 fun AppNavigation(
     navController: NavHostController = rememberNavController()
@@ -155,8 +159,14 @@ fun AppNavigation(
                     branchViewModel = branchViewModel,
                     menuViewModel = menuViewModel,
                     orderViewModel = orderViewModel,
+                    navController = navController,
                     typeViewModel = typeViewModel
                 )
+            }
+
+            composable(Screen.CheckoutScreen.route){
+                showBottomBar = false
+                BakeryCheckoutScreen()
             }
 
             composable(Screen.DashboardPetugas.route) {

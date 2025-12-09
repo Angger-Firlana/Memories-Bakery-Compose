@@ -15,14 +15,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.navigation.NavController
+import com.example.kenanganbakery.data.local.CartManager
 import com.example.kenanganbakery.domain.models.branch.Branch
 import com.example.kenanganbakery.domain.models.menu.Menu
 import com.example.kenanganbakery.domain.models.type.Type
+import com.example.kenanganbakery.presentation.navigation.Screen
+import com.example.kenanganbakery.presentation.ui.component.text.ModernText
 import com.example.kenanganbakery.presentation.ui.screen.pelanggan.menu.component.BranchSelectionDialog
 import com.example.kenanganbakery.presentation.ui.screen.pelanggan.menu.component.CartDialog
 import com.example.kenanganbakery.presentation.ui.screen.pelanggan.menu.component.CategoryChip
@@ -47,18 +52,22 @@ fun MenuScreen(
     branchViewModel: BranchViewModel,
     menuViewModel:MenuViewModel,
     orderViewModel:OrderViewModel,
+    navController:NavController,
     typeViewModel:TypeViewModel
 ) {
+    val context = LocalContext.current
     val branchs by branchViewModel.branchs.collectAsState()
     val menus by menuViewModel.menus.collectAsState()
     val types by typeViewModel.types.collectAsState()
+    val cartManager = remember { CartManager(context) }
+
 
     var selectedTypeId by remember { mutableStateOf(1) }
     var deliveryMode by remember { mutableStateOf("Pick up") }
     var selectedBranch by remember { mutableStateOf<Branch?>(null) }
     var showBranchDialog by remember { mutableStateOf(false) }
     var selectedProduct by remember { mutableStateOf<Menu?>(null) }
-    var cartItems by remember { mutableStateOf<List<CartItem>>(emptyList()) }
+    var cartItems by remember { mutableStateOf(listOf<CartItem>()) }
     var showCart by remember { mutableStateOf(false) }
     var showClearCartDialog by remember { mutableStateOf(false) }
 
@@ -66,6 +75,15 @@ fun MenuScreen(
         branchViewModel.getAllBranch()
         menuViewModel.getAllMenu()
         typeViewModel.getAllType()
+
+        val saved = cartManager.getCart()
+        if (saved != null) {
+            cartItems = saved
+        }
+    }
+
+    LaunchedEffect(cartItems) {
+        cartManager.saveCart(cartItems)
     }
 
     // Set default branch when data is loaded
@@ -124,14 +142,15 @@ fun MenuScreen(
             onDismiss = { selectedProduct = null },
             onAddToCart = {
                 val existingItem = cartItems.find { it.menu.id == product.id }
-                if (existingItem != null) {
-                    cartItems = cartItems.map {
+                cartItems = if (existingItem != null) {
+                    cartItems.map {
                         if (it.menu.id == product.id) it.copy(quantity = it.quantity + 1)
                         else it
                     }
                 } else {
-                    cartItems = cartItems + CartItem(product, 1)
+                    cartItems + CartItem(product, 1)
                 }
+
                 selectedProduct = null
             }
         )
@@ -153,6 +172,7 @@ fun MenuScreen(
             onClearCart = { showClearCartDialog = true },
             onBuy = {
                 // Handle buy action
+                navController.navigate(Screen.CheckoutScreen.route)
                 showCart = false
             }
         )
@@ -421,22 +441,55 @@ fun HomeScreen(
             Button(
                 onClick = onCartClick,
                 modifier = Modifier
-                    .fillMaxWidth()
                     .padding(16.dp)
-                    .padding(bottom = 64.dp),
+                    .fillMaxWidth()
+                    .height(60.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF6B4E3D)
+                    containerColor = Color(0xFFF5E6D3), // Warna cream/beige
+                    contentColor = Color(0xFF4A3428) // Warna coklat gelap untuk text
                 ),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.ShoppingCart,
-                    contentDescription = "Cart"
+                shape = RoundedCornerShape(30.dp), // Lebih rounded
+                elevation = ButtonDefaults.buttonElevation(
+                    defaultElevation = 2.dp
                 )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Rp ${cartItems.sumOf { it.menu.price * it.quantity }.formatPrice()}")
-                Spacer(modifier = Modifier.width(16.dp))
-                Text("Buy")
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Bagian kiri - Icon dan Price
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ShoppingCart,
+                            contentDescription = "Cart",
+                            tint = Color(0xFF4A3428)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        ModernText(
+                            text = "Rp ${cartItems.sumOf { it.menu.price * it.quantity }.formatPrice()}",
+                            size = 14,
+                            color = Color(0xFF4A3428)
+                        )
+                    }
+
+                    // Bagian kanan - Buy button
+                    Surface(
+                        color = Color(0xFF4A3428), // Warna coklat gelap
+                        shape = RoundedCornerShape(20.dp),
+                        modifier = Modifier.padding(start = 16.dp)
+                    ) {
+                        Text(
+                            text = "Buy",
+                            modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
+                            color = Color.White,
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                }
             }
         }
     }
